@@ -90,6 +90,7 @@ Function Get-GithubLicense {
 
     begin {
         $API_URL = "https://api.github.com/licenses"
+        $Headers = @{ "Accept" = "application/vnd.github.v3+json" }
     }
 
     process {
@@ -97,7 +98,7 @@ Function Get-GithubLicense {
             foreach ($License in $Key) {
                 
                 try {
-                    Invoke-RestMethod -Uri ("{0}/{1}" -f ($API_URL, $License))
+                    Invoke-RestMethod -Uri ("{0}/{1}" -f ($API_URL, $License)) -Headers $Headers
                 } catch {
                     throw "API Endpoint not available."
                 }
@@ -107,7 +108,7 @@ Function Get-GithubLicense {
 
         if ($PSCmdlet.ParameterSetName -eq "All") {
             try {
-                $Licenses = Invoke-RestMethod -Uri $API_URL
+                $Licenses = Invoke-RestMethod -Uri $API_URL -Headers $Headers
                 $Licenses | Select-Object key, name, url
             } catch {
                 throw "API Endpoint not available."
@@ -254,6 +255,7 @@ Function Install-GithubLicense {
 
     begin {
         $API_URL = "https://api.github.com/licenses/"
+        $Headers = @{ "Accept" = "application/vnd.github.v3+json" }
 
         if ([String]::IsNullOrEmpty($Author)) {
             $Author = $env:USER
@@ -271,7 +273,7 @@ Function Install-GithubLicense {
         
         try {
             Write-Verbose "Downloading license `"$($Name)`""
-            $Response = Invoke-RestMethod -Uri "$($API_URL)$Name"
+            $Response = Invoke-RestMethod -Uri "$($API_URL)$Name" -Headers $Headers
             $LicenseText = $Response.body
         } catch {
             throw "Could not retrieve license."
